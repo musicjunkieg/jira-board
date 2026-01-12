@@ -11,7 +11,7 @@ const state = {
     columns: [],
     issues: [],
     swimlanesEnabled: false,
-    swimlaneType: 'assignee',
+    swimlaneType: 'component',
     displayOptions: {
         showAvatars: true,
         showPriority: true,
@@ -32,16 +32,19 @@ const defaultColumns = [
     { id: 'col-4', name: 'Done', wip: 0, color: '#36B37E' }
 ];
 
+// Available components
+const components = ['Internal', 'Client', 'Service'];
+
 // Sample issues for demo
 const sampleIssues = [
-    { id: 'issue-1', key: 'PROJ-1', type: 'story', priority: 'high', summary: 'Implement user authentication flow', description: 'Add login, logout, and session management', assignee: 'john', estimate: 8, labels: ['auth', 'security'], epic: '', dueDate: '', columnId: 'col-1' },
-    { id: 'issue-2', key: 'PROJ-2', type: 'bug', priority: 'highest', summary: 'Fix memory leak in data processing module', description: '', assignee: 'jane', estimate: 5, labels: ['bug', 'performance'], epic: '', dueDate: '2026-01-15', columnId: 'col-2' },
-    { id: 'issue-3', key: 'PROJ-3', type: 'task', priority: 'medium', summary: 'Update documentation for API endpoints', description: '', assignee: 'bob', estimate: 3, labels: ['docs'], epic: '', dueDate: '', columnId: 'col-2' },
-    { id: 'issue-4', key: 'PROJ-4', type: 'epic', priority: 'high', summary: 'User Management System', description: 'Complete user management features', assignee: 'alice', estimate: 21, labels: [], epic: '', dueDate: '', columnId: 'col-1' },
-    { id: 'issue-5', key: 'PROJ-5', type: 'story', priority: 'low', summary: 'Add dark mode support', description: '', assignee: '', estimate: 5, labels: ['ui', 'enhancement'], epic: '', dueDate: '', columnId: 'col-3' },
-    { id: 'issue-6', key: 'PROJ-6', type: 'subtask', priority: 'medium', summary: 'Write unit tests for auth module', description: '', assignee: 'john', estimate: 3, labels: ['testing'], epic: '', dueDate: '', columnId: 'col-2' },
-    { id: 'issue-7', key: 'PROJ-7', type: 'story', priority: 'medium', summary: 'Implement password reset functionality', description: '', assignee: 'jane', estimate: 5, labels: ['auth'], epic: '', dueDate: '', columnId: 'col-4' },
-    { id: 'issue-8', key: 'PROJ-8', type: 'bug', priority: 'high', summary: 'Fix responsive layout issues on mobile', description: '', assignee: '', estimate: 2, labels: ['ui', 'mobile'], epic: '', dueDate: '', columnId: 'col-1' }
+    { id: 'issue-1', key: 'PROJ-1', type: 'story', priority: 'high', summary: 'Implement user authentication flow', description: 'Add login, logout, and session management', assignee: 'john', estimate: 8, labels: ['auth', 'security'], epic: '', dueDate: '', columnId: 'col-1', component: 'Internal' },
+    { id: 'issue-2', key: 'PROJ-2', type: 'bug', priority: 'highest', summary: 'Fix memory leak in data processing module', description: '', assignee: 'jane', estimate: 5, labels: ['bug', 'performance'], epic: '', dueDate: '2026-01-15', columnId: 'col-2', component: 'Service' },
+    { id: 'issue-3', key: 'PROJ-3', type: 'task', priority: 'medium', summary: 'Update documentation for API endpoints', description: '', assignee: 'bob', estimate: 3, labels: ['docs'], epic: '', dueDate: '', columnId: 'col-2', component: 'Client' },
+    { id: 'issue-4', key: 'PROJ-4', type: 'epic', priority: 'high', summary: 'User Management System', description: 'Complete user management features', assignee: 'alice', estimate: 21, labels: [], epic: '', dueDate: '', columnId: 'col-1', component: 'Internal' },
+    { id: 'issue-5', key: 'PROJ-5', type: 'story', priority: 'low', summary: 'Add dark mode support', description: '', assignee: '', estimate: 5, labels: ['ui', 'enhancement'], epic: '', dueDate: '', columnId: 'col-3', component: 'Client' },
+    { id: 'issue-6', key: 'PROJ-6', type: 'subtask', priority: 'medium', summary: 'Write unit tests for auth module', description: '', assignee: 'john', estimate: 3, labels: ['testing'], epic: '', dueDate: '', columnId: 'col-2', component: 'Internal' },
+    { id: 'issue-7', key: 'PROJ-7', type: 'story', priority: 'medium', summary: 'Implement password reset functionality', description: '', assignee: 'jane', estimate: 5, labels: ['auth'], epic: '', dueDate: '', columnId: 'col-4', component: 'Service' },
+    { id: 'issue-8', key: 'PROJ-8', type: 'bug', priority: 'high', summary: 'Fix responsive layout issues on mobile', description: '', assignee: '', estimate: 2, labels: ['ui', 'mobile'], epic: '', dueDate: '', columnId: 'col-1', component: 'Client' }
 ];
 
 // DOM Elements
@@ -216,6 +219,20 @@ function getSwimlaneGroups() {
     const groups = [];
 
     switch (state.swimlaneType) {
+        case 'component':
+            // Add each component as a swimlane
+            components.forEach(c => {
+                groups.push({
+                    id: c,
+                    name: c
+                });
+            });
+            // Add "No Component" for issues without a component
+            groups.push({
+                id: 'no-component',
+                name: 'No Component'
+            });
+            break;
         case 'assignee':
             const assignees = ['', 'john', 'jane', 'bob', 'alice'];
             assignees.forEach(a => {
@@ -253,6 +270,8 @@ function getSwimlaneGroups() {
 // Get Swimlane Value for Issue
 function getSwimlaneValue(issue) {
     switch (state.swimlaneType) {
+        case 'component':
+            return issue.component || 'no-component';
         case 'assignee':
             return issue.assignee || 'unassigned';
         case 'priority':
@@ -346,6 +365,11 @@ function createIssueCard(issue) {
         }
     }
 
+    let componentHtml = '';
+    if (issue.component) {
+        componentHtml = `<span class="issue-component-tag" data-component="${issue.component.toLowerCase()}">${issue.component}</span>`;
+    }
+
     let assigneeHtml = '';
     if (state.displayOptions.showAvatars && issue.assignee) {
         assigneeHtml = `
@@ -367,6 +391,7 @@ function createIssueCard(issue) {
         ${labelsHtml}
         <div class="issue-footer">
             <div class="issue-meta">
+                ${componentHtml}
                 ${estimateHtml}
                 ${epicHtml}
                 ${dueDateHtml}
@@ -405,7 +430,8 @@ function matchesSearch(issue) {
     return (
         issue.key.toLowerCase().includes(query) ||
         issue.summary.toLowerCase().includes(query) ||
-        issue.labels.some(l => l.toLowerCase().includes(query))
+        issue.labels.some(l => l.toLowerCase().includes(query)) ||
+        (issue.component && issue.component.toLowerCase().includes(query))
     );
 }
 
@@ -839,6 +865,7 @@ function openIssueModal(issue = null) {
         document.getElementById('issueDescription').value = issue.description || '';
         document.getElementById('issueAssignee').value = issue.assignee || '';
         document.getElementById('issueEstimate').value = issue.estimate || '';
+        document.getElementById('issueComponent').value = issue.component || '';
         document.getElementById('issueEpic').value = issue.epic || '';
         document.getElementById('issueDueDate').value = issue.dueDate || '';
         document.getElementById('issueLabels').value = issue.labels.join(', ');
@@ -854,6 +881,7 @@ function openIssueModal(issue = null) {
         document.getElementById('issueDescription').value = '';
         document.getElementById('issueAssignee').value = '';
         document.getElementById('issueEstimate').value = '';
+        document.getElementById('issueComponent').value = '';
         document.getElementById('issueEpic').value = '';
         document.getElementById('issueDueDate').value = '';
         document.getElementById('issueLabels').value = '';
@@ -894,6 +922,7 @@ function saveIssue() {
             issue.description = document.getElementById('issueDescription').value;
             issue.assignee = document.getElementById('issueAssignee').value;
             issue.estimate = document.getElementById('issueEstimate').value;
+            issue.component = document.getElementById('issueComponent').value;
             issue.epic = document.getElementById('issueEpic').value;
             issue.dueDate = document.getElementById('issueDueDate').value;
             issue.labels = labels;
@@ -912,6 +941,7 @@ function saveIssue() {
             description: document.getElementById('issueDescription').value,
             assignee: document.getElementById('issueAssignee').value,
             estimate: document.getElementById('issueEstimate').value,
+            component: document.getElementById('issueComponent').value,
             epic: document.getElementById('issueEpic').value,
             dueDate: document.getElementById('issueDueDate').value,
             labels: labels,

@@ -92,10 +92,10 @@
             <span>Group by Swimlanes</span>
         </label>
         <select id="swimlaneType" disabled>
+            <option value="component">Component</option>
             <option value="assignee">Assignee</option>
             <option value="priority">Priority</option>
             <option value="epic">Epic</option>
-            <option value="none">None</option>
         </select>
     </div>
 
@@ -209,6 +209,17 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="issueComponent">Component</label>
+                        <select id="issueComponent">
+                            <option value="">None</option>
+                            <option value="Internal">Internal</option>
+                            <option value="Client">Client</option>
+                            <option value="Service">Service</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="issueEstimate">Story Points</label>
                         <select id="issueEstimate">
                             <option value="">None</option>
@@ -221,18 +232,16 @@
                             <option value="21">21</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="issueEpic">Epic Link</label>
-                        <select id="issueEpic">
-                            <option value="">None</option>
-                        </select>
-                    </div>
                     <div class="form-group">
                         <label for="issueDueDate">Due Date</label>
                         <input type="date" id="issueDueDate">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="issueEpic">Epic Link</label>
+                    <select id="issueEpic">
+                        <option value="">None</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="issueLabels">Labels</label>
