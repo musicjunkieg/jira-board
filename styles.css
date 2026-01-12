@@ -1410,3 +1410,636 @@ body {
     background-color: var(--jira-blue-subtle);
     color: var(--jira-blue-dark);
 }
+
+/* ===== VIEW TABS ===== */
+.view-tabs {
+    display: flex;
+    margin-left: var(--spacing-xl);
+    gap: 2px;
+}
+
+.view-tab {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: 14px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--neutral-400);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.view-tab:hover {
+    color: var(--neutral-600);
+    background-color: var(--neutral-20);
+}
+
+.view-tab.active {
+    color: var(--jira-blue);
+    border-bottom-color: var(--jira-blue);
+}
+
+/* ===== BACKLOG CONTAINER ===== */
+.backlog-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-height) - var(--toolbar-height) - var(--swimlane-height));
+    background-color: var(--neutral-10);
+}
+
+/* Backlog Toolbar */
+.backlog-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--neutral-0);
+    border-bottom: 1px solid var(--neutral-40);
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.backlog-toolbar-left,
+.backlog-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.backlog-filters {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.filter-select {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 13px;
+    border: 1px solid var(--neutral-40);
+    border-radius: var(--radius-sm);
+    background-color: var(--neutral-0);
+    color: var(--neutral-600);
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--jira-blue);
+    box-shadow: 0 0 0 1px var(--jira-blue);
+}
+
+.bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--jira-blue-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.selected-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--jira-blue);
+    padding-right: var(--spacing-sm);
+    border-right: 1px solid var(--jira-blue-light);
+}
+
+.backlog-search {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--neutral-20);
+    border: 1px solid var(--neutral-40);
+    border-radius: var(--radius-sm);
+}
+
+.backlog-search:focus-within {
+    border-color: var(--jira-blue);
+    box-shadow: 0 0 0 1px var(--jira-blue);
+}
+
+.backlog-search svg {
+    color: var(--neutral-200);
+    flex-shrink: 0;
+}
+
+.backlog-search input {
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--neutral-800);
+    width: 200px;
+}
+
+/* Backlog Content */
+.backlog-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.backlog-list-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Backlog Header */
+.backlog-header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--neutral-20);
+    border-bottom: 1px solid var(--neutral-40);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--neutral-400);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.backlog-header-cell {
+    flex-shrink: 0;
+    padding: 0 var(--spacing-xs);
+}
+
+.checkbox-cell {
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rank-cell {
+    width: 50px;
+    text-align: center;
+}
+
+.type-cell {
+    width: 32px;
+    text-align: center;
+}
+
+.key-cell {
+    width: 100px;
+}
+
+.summary-cell {
+    flex: 1;
+    min-width: 200px;
+}
+
+.component-cell {
+    width: 100px;
+}
+
+.priority-cell {
+    width: 32px;
+    text-align: center;
+}
+
+.status-cell {
+    width: 100px;
+}
+
+.assignee-cell {
+    width: 120px;
+}
+
+.estimate-cell {
+    width: 50px;
+    text-align: center;
+}
+
+/* Backlog List */
+.backlog-list {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--neutral-0);
+}
+
+/* Backlog Row */
+.backlog-row {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--neutral-30);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    background-color: var(--neutral-0);
+}
+
+.backlog-row:hover {
+    background-color: var(--neutral-10);
+}
+
+.backlog-row.selected {
+    background-color: var(--jira-blue-subtle);
+}
+
+.backlog-row.dragging {
+    opacity: 0.5;
+    background-color: var(--neutral-30);
+}
+
+.backlog-row.drag-over {
+    border-top: 2px solid var(--jira-blue);
+}
+
+.backlog-cell {
+    flex-shrink: 0;
+    padding: 0 var(--spacing-xs);
+    font-size: 13px;
+    color: var(--neutral-700);
+}
+
+.backlog-cell.checkbox-cell input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.backlog-cell.rank-cell {
+    width: 50px;
+    text-align: center;
+    color: var(--neutral-300);
+    cursor: grab;
+}
+
+.backlog-cell.rank-cell:active {
+    cursor: grabbing;
+}
+
+.backlog-cell.rank-cell .rank-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.backlog-cell.rank-cell .rank-number {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.backlog-cell.type-cell {
+    width: 32px;
+}
+
+.backlog-cell.type-cell svg {
+    width: 16px;
+    height: 16px;
+}
+
+.backlog-cell.key-cell {
+    width: 100px;
+    font-weight: 500;
+    color: var(--jira-blue);
+}
+
+.backlog-cell.key-cell:hover {
+    text-decoration: underline;
+}
+
+.backlog-cell.summary-cell {
+    flex: 1;
+    min-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.backlog-cell.component-cell {
+    width: 100px;
+}
+
+.backlog-cell.priority-cell {
+    width: 32px;
+}
+
+.backlog-cell.priority-cell svg {
+    width: 14px;
+    height: 14px;
+}
+
+.backlog-cell.status-cell {
+    width: 100px;
+}
+
+.backlog-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.backlog-status-badge.backlog {
+    background-color: var(--neutral-30);
+    color: var(--neutral-500);
+}
+
+.backlog-status-badge.todo {
+    background-color: var(--neutral-30);
+    color: var(--neutral-600);
+}
+
+.backlog-status-badge.in-progress {
+    background-color: var(--jira-blue-subtle);
+    color: var(--jira-blue);
+}
+
+.backlog-status-badge.done {
+    background-color: var(--green-subtle);
+    color: var(--green);
+}
+
+.backlog-cell.assignee-cell {
+    width: 120px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.backlog-assignee-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--neutral-40);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--neutral-0);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.backlog-assignee-avatar.john { background-color: #FF5630; }
+.backlog-assignee-avatar.jane { background-color: #36B37E; }
+.backlog-assignee-avatar.bob { background-color: #6554C0; }
+.backlog-assignee-avatar.alice { background-color: #00B8D9; }
+
+.backlog-assignee-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.backlog-cell.estimate-cell {
+    width: 50px;
+    text-align: center;
+}
+
+.backlog-estimate-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background-color: var(--neutral-30);
+    border-radius: var(--radius-sm);
+    color: var(--neutral-500);
+}
+
+/* Backlog Empty State */
+.backlog-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xxl);
+    color: var(--neutral-300);
+    text-align: center;
+}
+
+.backlog-empty svg {
+    opacity: 0.4;
+    margin-bottom: var(--spacing-md);
+}
+
+.backlog-empty p {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.backlog-empty span {
+    font-size: 13px;
+    color: var(--neutral-200);
+}
+
+/* Issue Detail Panel */
+.issue-detail-panel {
+    width: 400px;
+    background-color: var(--neutral-0);
+    border-left: 1px solid var(--neutral-40);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.issue-detail-panel.hidden {
+    display: none;
+}
+
+.detail-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--neutral-40);
+}
+
+.detail-issue-key {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--jira-blue);
+}
+
+.detail-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.detail-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+}
+
+.detail-summary {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--neutral-800);
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.4;
+}
+
+.detail-description {
+    margin-bottom: var(--spacing-xl);
+}
+
+.detail-description h4 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--neutral-400);
+    margin-bottom: var(--spacing-sm);
+}
+
+.detail-description p {
+    font-size: 14px;
+    color: var(--neutral-600);
+    line-height: 1.6;
+}
+
+.detail-fields {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.detail-field label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--neutral-400);
+}
+
+.detail-field .detail-value {
+    font-size: 14px;
+    color: var(--neutral-700);
+}
+
+.detail-field .detail-value:empty::before {
+    content: 'None';
+    color: var(--neutral-300);
+}
+
+/* Responsive Backlog */
+@media (max-width: 1200px) {
+    .issue-detail-panel {
+        width: 350px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .backlog-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .backlog-toolbar-left,
+    .backlog-toolbar-right {
+        width: 100%;
+    }
+
+    .backlog-filters {
+        flex-wrap: wrap;
+    }
+
+    .issue-detail-panel {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 400px;
+        height: 100vh;
+        z-index: var(--z-modal);
+        transition: var(--transition-slow);
+    }
+
+    .issue-detail-panel.open {
+        right: 0;
+    }
+
+    .component-cell,
+    .status-cell {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .view-tabs {
+        margin-left: var(--spacing-md);
+    }
+
+    .view-tab {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 12px;
+    }
+
+    .backlog-header {
+        display: none;
+    }
+
+    .backlog-row {
+        flex-wrap: wrap;
+        padding: var(--spacing-md);
+        gap: var(--spacing-sm);
+    }
+
+    .backlog-cell.rank-cell {
+        order: -1;
+        width: auto;
+    }
+
+    .backlog-cell.checkbox-cell {
+        order: -2;
+    }
+
+    .backlog-cell.summary-cell {
+        width: 100%;
+        order: 1;
+    }
+
+    .backlog-cell.key-cell {
+        width: auto;
+    }
+
+    .backlog-cell.assignee-cell {
+        width: auto;
+    }
+
+    .backlog-cell.priority-cell,
+    .backlog-cell.estimate-cell {
+        width: auto;
+    }
+
+    .filter-select {
+        min-width: 100px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .backlog-filters {
+        display: none;
+    }
+
+    .bulk-actions {
+        flex-wrap: wrap;
+    }
+
+    .backlog-cell.type-cell {
+        display: none;
+    }
+}

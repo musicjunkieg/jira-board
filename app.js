@@ -21,7 +21,17 @@ const state = {
     },
     theme: 'light',
     activeFilter: 'all',
-    searchQuery: ''
+    searchQuery: '',
+    // Backlog state
+    currentView: 'board',
+    selectedIssues: [],
+    backlogFilters: {
+        component: '',
+        type: '',
+        assignee: '',
+        search: ''
+    },
+    detailPanelIssueId: null
 };
 
 // Default columns
@@ -35,16 +45,26 @@ const defaultColumns = [
 // Available components
 const components = ['Internal', 'Client', 'Service'];
 
-// Sample issues for demo
+// Sample issues for demo (rank field for backlog ordering, columnId: 'backlog' for backlog items)
 const sampleIssues = [
-    { id: 'issue-1', key: 'PROJ-1', type: 'story', priority: 'high', summary: 'Implement user authentication flow', description: 'Add login, logout, and session management', assignee: 'john', estimate: 8, labels: ['auth', 'security'], epic: '', dueDate: '', columnId: 'col-1', component: 'Internal' },
-    { id: 'issue-2', key: 'PROJ-2', type: 'bug', priority: 'highest', summary: 'Fix memory leak in data processing module', description: '', assignee: 'jane', estimate: 5, labels: ['bug', 'performance'], epic: '', dueDate: '2026-01-15', columnId: 'col-2', component: 'Service' },
-    { id: 'issue-3', key: 'PROJ-3', type: 'task', priority: 'medium', summary: 'Update documentation for API endpoints', description: '', assignee: 'bob', estimate: 3, labels: ['docs'], epic: '', dueDate: '', columnId: 'col-2', component: 'Client' },
-    { id: 'issue-4', key: 'PROJ-4', type: 'epic', priority: 'high', summary: 'User Management System', description: 'Complete user management features', assignee: 'alice', estimate: 21, labels: [], epic: '', dueDate: '', columnId: 'col-1', component: 'Internal' },
-    { id: 'issue-5', key: 'PROJ-5', type: 'story', priority: 'low', summary: 'Add dark mode support', description: '', assignee: '', estimate: 5, labels: ['ui', 'enhancement'], epic: '', dueDate: '', columnId: 'col-3', component: 'Client' },
-    { id: 'issue-6', key: 'PROJ-6', type: 'subtask', priority: 'medium', summary: 'Write unit tests for auth module', description: '', assignee: 'john', estimate: 3, labels: ['testing'], epic: '', dueDate: '', columnId: 'col-2', component: 'Internal' },
-    { id: 'issue-7', key: 'PROJ-7', type: 'story', priority: 'medium', summary: 'Implement password reset functionality', description: '', assignee: 'jane', estimate: 5, labels: ['auth'], epic: '', dueDate: '', columnId: 'col-4', component: 'Service' },
-    { id: 'issue-8', key: 'PROJ-8', type: 'bug', priority: 'high', summary: 'Fix responsive layout issues on mobile', description: '', assignee: '', estimate: 2, labels: ['ui', 'mobile'], epic: '', dueDate: '', columnId: 'col-1', component: 'Client' }
+    // Board issues
+    { id: 'issue-1', key: 'PROJ-1', type: 'story', priority: 'high', summary: 'Implement user authentication flow', description: 'Add login, logout, and session management', assignee: 'john', estimate: 8, labels: ['auth', 'security'], epic: '', dueDate: '', columnId: 'col-1', component: 'Internal', rank: 1 },
+    { id: 'issue-2', key: 'PROJ-2', type: 'bug', priority: 'highest', summary: 'Fix memory leak in data processing module', description: '', assignee: 'jane', estimate: 5, labels: ['bug', 'performance'], epic: '', dueDate: '2026-01-15', columnId: 'col-2', component: 'Service', rank: 2 },
+    { id: 'issue-3', key: 'PROJ-3', type: 'task', priority: 'medium', summary: 'Update documentation for API endpoints', description: '', assignee: 'bob', estimate: 3, labels: ['docs'], epic: '', dueDate: '', columnId: 'col-2', component: 'Client', rank: 3 },
+    { id: 'issue-4', key: 'PROJ-4', type: 'epic', priority: 'high', summary: 'User Management System', description: 'Complete user management features', assignee: 'alice', estimate: 21, labels: [], epic: '', dueDate: '', columnId: 'col-1', component: 'Internal', rank: 4 },
+    { id: 'issue-5', key: 'PROJ-5', type: 'story', priority: 'low', summary: 'Add dark mode support', description: '', assignee: '', estimate: 5, labels: ['ui', 'enhancement'], epic: '', dueDate: '', columnId: 'col-3', component: 'Client', rank: 5 },
+    { id: 'issue-6', key: 'PROJ-6', type: 'subtask', priority: 'medium', summary: 'Write unit tests for auth module', description: '', assignee: 'john', estimate: 3, labels: ['testing'], epic: '', dueDate: '', columnId: 'col-2', component: 'Internal', rank: 6 },
+    { id: 'issue-7', key: 'PROJ-7', type: 'story', priority: 'medium', summary: 'Implement password reset functionality', description: '', assignee: 'jane', estimate: 5, labels: ['auth'], epic: '', dueDate: '', columnId: 'col-4', component: 'Service', rank: 7 },
+    { id: 'issue-8', key: 'PROJ-8', type: 'bug', priority: 'high', summary: 'Fix responsive layout issues on mobile', description: '', assignee: '', estimate: 2, labels: ['ui', 'mobile'], epic: '', dueDate: '', columnId: 'col-1', component: 'Client', rank: 8 },
+    // Backlog issues
+    { id: 'issue-9', key: 'PROJ-9', type: 'story', priority: 'medium', summary: 'Implement user profile page', description: 'Create a user profile page where users can view and edit their information', assignee: '', estimate: 5, labels: ['ui', 'user'], epic: '', dueDate: '', columnId: 'backlog', component: 'Client', rank: 1 },
+    { id: 'issue-10', key: 'PROJ-10', type: 'bug', priority: 'low', summary: 'Fix date picker alignment on Safari', description: '', assignee: 'bob', estimate: 2, labels: ['ui', 'browser'], epic: '', dueDate: '', columnId: 'backlog', component: 'Client', rank: 2 },
+    { id: 'issue-11', key: 'PROJ-11', type: 'task', priority: 'high', summary: 'Set up CI/CD pipeline', description: 'Configure automated testing and deployment', assignee: 'alice', estimate: 8, labels: ['devops'], epic: '', dueDate: '', columnId: 'backlog', component: 'Internal', rank: 3 },
+    { id: 'issue-12', key: 'PROJ-12', type: 'story', priority: 'medium', summary: 'Add email notification system', description: 'Implement transactional emails for user actions', assignee: '', estimate: 13, labels: ['notifications'], epic: '', dueDate: '', columnId: 'backlog', component: 'Service', rank: 4 },
+    { id: 'issue-13', key: 'PROJ-13', type: 'task', priority: 'low', summary: 'Optimize database queries', description: 'Review and optimize slow database queries', assignee: 'jane', estimate: 5, labels: ['performance', 'database'], epic: '', dueDate: '', columnId: 'backlog', component: 'Service', rank: 5 },
+    { id: 'issue-14', key: 'PROJ-14', type: 'story', priority: 'highest', summary: 'Implement two-factor authentication', description: 'Add 2FA support using TOTP', assignee: 'john', estimate: 8, labels: ['auth', 'security'], epic: '', dueDate: '', columnId: 'backlog', component: 'Internal', rank: 6 },
+    { id: 'issue-15', key: 'PROJ-15', type: 'bug', priority: 'medium', summary: 'Session timeout not working correctly', description: '', assignee: '', estimate: 3, labels: ['auth'], epic: '', dueDate: '', columnId: 'backlog', component: 'Internal', rank: 7 },
+    { id: 'issue-16', key: 'PROJ-16', type: 'story', priority: 'low', summary: 'Add export to CSV functionality', description: 'Allow users to export their data as CSV files', assignee: '', estimate: 3, labels: ['feature'], epic: '', dueDate: '', columnId: 'backlog', component: 'Client', rank: 8 }
 ];
 
 // DOM Elements
@@ -66,7 +86,17 @@ const elements = {
     exportBtn: document.getElementById('exportBtn'),
     importBtn: document.getElementById('importBtn'),
     importFile: document.getElementById('importFile'),
-    menuToggle: document.getElementById('menuToggle')
+    menuToggle: document.getElementById('menuToggle'),
+    // Backlog elements
+    boardContainer: document.getElementById('boardContainer'),
+    backlogContainer: document.getElementById('backlogContainer'),
+    backlogList: document.getElementById('backlogList'),
+    backlogEmpty: document.getElementById('backlogEmpty'),
+    issueDetailPanel: document.getElementById('issueDetailPanel'),
+    bulkActions: document.getElementById('bulkActions'),
+    backlogFilters: document.getElementById('backlogFilters'),
+    selectedCount: document.getElementById('selectedCount'),
+    selectAllBacklog: document.getElementById('selectAllBacklog')
 };
 
 // Icon Templates
@@ -91,10 +121,13 @@ const icons = {
 function init() {
     loadState();
     renderBoard();
+    renderBacklog();
     setupEventListeners();
+    setupBacklogEventListeners();
     updateColumnSelect();
     updateEpicSelect();
     applyTheme();
+    switchView(state.currentView);
 }
 
 // Load State from LocalStorage
@@ -107,7 +140,7 @@ function loadState() {
     } else {
         state.columns = [...defaultColumns];
         state.issues = [...sampleIssues];
-        state.issueCounter = 9;
+        state.issueCounter = 17; // Updated for 16 sample issues
     }
 }
 
@@ -846,7 +879,7 @@ function renderColumnSettings() {
 // Open Issue Modal
 let editingIssueId = null;
 
-function openIssueModal(issue = null) {
+function openIssueModal(issue = null, defaultColumnId = null) {
     editingIssueId = issue ? issue.id : null;
 
     const modal = elements.issueModal;
@@ -885,7 +918,7 @@ function openIssueModal(issue = null) {
         document.getElementById('issueEpic').value = '';
         document.getElementById('issueDueDate').value = '';
         document.getElementById('issueLabels').value = '';
-        document.getElementById('issueColumn').value = state.columns[0]?.id || '';
+        document.getElementById('issueColumn').value = defaultColumnId || state.columns[0]?.id || '';
     }
 
     updateEpicSelect();
@@ -932,6 +965,15 @@ function saveIssue() {
         }
     } else {
         // Create new issue
+        const newColumnId = document.getElementById('issueColumn').value;
+
+        // Calculate rank for backlog items
+        let rank = 0;
+        if (newColumnId === 'backlog') {
+            const backlogIssues = state.issues.filter(i => i.columnId === 'backlog');
+            rank = backlogIssues.length > 0 ? Math.max(...backlogIssues.map(i => i.rank || 0)) + 1 : 1;
+        }
+
         const newIssue = {
             id: `issue-${Date.now()}`,
             key: `${state.projectKey}-${state.issueCounter}`,
@@ -945,7 +987,8 @@ function saveIssue() {
             epic: document.getElementById('issueEpic').value,
             dueDate: document.getElementById('issueDueDate').value,
             labels: labels,
-            columnId: document.getElementById('issueColumn').value
+            columnId: newColumnId,
+            rank: rank
         };
 
         state.issues.push(newIssue);
@@ -956,6 +999,7 @@ function saveIssue() {
 
     saveState();
     renderBoard();
+    renderBacklog();
     closeIssueModal();
 }
 
@@ -967,6 +1011,7 @@ function deleteIssue() {
             state.issues = state.issues.filter(i => i.id !== editingIssueId);
             saveState();
             renderBoard();
+            renderBacklog();
             closeIssueModal();
             showToast(`${issue.key} deleted`);
         }
@@ -977,6 +1022,14 @@ function deleteIssue() {
 function updateColumnSelect() {
     const select = document.getElementById('issueColumn');
     select.innerHTML = '';
+
+    // Add Backlog option
+    const backlogOption = document.createElement('option');
+    backlogOption.value = 'backlog';
+    backlogOption.textContent = 'Backlog';
+    select.appendChild(backlogOption);
+
+    // Add column options
     state.columns.forEach(col => {
         const option = document.createElement('option');
         option.value = col.id;
@@ -1222,6 +1275,515 @@ function formatDate(dateStr) {
 
 function formatDateForFile(date) {
     return date.toISOString().split('T')[0];
+}
+
+// ===== BACKLOG FUNCTIONALITY =====
+
+// Switch between Board and Backlog views
+function switchView(view) {
+    state.currentView = view;
+
+    // Update tab states
+    document.querySelectorAll('.view-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.view === view);
+    });
+
+    // Show/hide containers
+    if (elements.boardContainer) {
+        elements.boardContainer.style.display = view === 'board' ? 'block' : 'none';
+    }
+    if (elements.backlogContainer) {
+        elements.backlogContainer.style.display = view === 'backlog' ? 'flex' : 'none';
+    }
+
+    // Show/hide board-specific toolbar elements
+    const swimlaneControls = document.querySelector('.swimlane-controls');
+    const toolbar = document.querySelector('.toolbar');
+    if (swimlaneControls) {
+        swimlaneControls.style.display = view === 'board' ? 'flex' : 'none';
+    }
+    if (toolbar) {
+        toolbar.style.display = view === 'board' ? 'flex' : 'none';
+    }
+
+    // Render the appropriate view
+    if (view === 'backlog') {
+        renderBacklog();
+    }
+
+    saveState();
+}
+
+// Render Backlog
+function renderBacklog() {
+    if (!elements.backlogList) return;
+
+    const backlogIssues = getFilteredBacklogIssues();
+    elements.backlogList.innerHTML = '';
+
+    if (backlogIssues.length === 0) {
+        if (elements.backlogEmpty) elements.backlogEmpty.style.display = 'flex';
+        return;
+    }
+
+    if (elements.backlogEmpty) elements.backlogEmpty.style.display = 'none';
+
+    // Sort by rank
+    backlogIssues.sort((a, b) => (a.rank || 0) - (b.rank || 0));
+
+    backlogIssues.forEach((issue, index) => {
+        const row = createBacklogRow(issue, index + 1);
+        elements.backlogList.appendChild(row);
+    });
+
+    setupBacklogDragAndDrop();
+    updateBulkActionsVisibility();
+}
+
+// Get Filtered Backlog Issues
+function getFilteredBacklogIssues() {
+    return state.issues.filter(issue => {
+        // Must be in backlog
+        if (issue.columnId !== 'backlog') return false;
+
+        // Apply component filter
+        if (state.backlogFilters.component && issue.component !== state.backlogFilters.component) {
+            return false;
+        }
+
+        // Apply type filter
+        if (state.backlogFilters.type && issue.type !== state.backlogFilters.type) {
+            return false;
+        }
+
+        // Apply assignee filter
+        if (state.backlogFilters.assignee) {
+            if (state.backlogFilters.assignee === 'unassigned' && issue.assignee) {
+                return false;
+            } else if (state.backlogFilters.assignee !== 'unassigned' && issue.assignee !== state.backlogFilters.assignee) {
+                return false;
+            }
+        }
+
+        // Apply search filter
+        if (state.backlogFilters.search) {
+            const search = state.backlogFilters.search.toLowerCase();
+            return (
+                issue.key.toLowerCase().includes(search) ||
+                issue.summary.toLowerCase().includes(search) ||
+                (issue.component && issue.component.toLowerCase().includes(search)) ||
+                issue.labels.some(l => l.toLowerCase().includes(search))
+            );
+        }
+
+        return true;
+    });
+}
+
+// Create Backlog Row
+function createBacklogRow(issue, displayRank) {
+    const row = document.createElement('div');
+    row.className = 'backlog-row';
+    row.dataset.issueId = issue.id;
+    row.draggable = true;
+
+    if (state.selectedIssues.includes(issue.id)) {
+        row.classList.add('selected');
+    }
+
+    const statusBadge = getStatusBadge(issue.columnId);
+    const assigneeHtml = issue.assignee
+        ? `<div class="backlog-assignee-avatar ${issue.assignee}">${issue.assignee.charAt(0).toUpperCase()}</div>
+           <span class="backlog-assignee-name">${getAssigneeName(issue.assignee)}</span>`
+        : '<span class="backlog-assignee-name" style="color: var(--neutral-300)">Unassigned</span>';
+
+    const componentHtml = issue.component
+        ? `<span class="issue-component-tag" data-component="${issue.component.toLowerCase()}">${issue.component}</span>`
+        : '<span style="color: var(--neutral-300)">-</span>';
+
+    row.innerHTML = `
+        <div class="backlog-cell checkbox-cell">
+            <input type="checkbox" class="issue-checkbox" data-issue-id="${issue.id}" ${state.selectedIssues.includes(issue.id) ? 'checked' : ''}>
+        </div>
+        <div class="backlog-cell rank-cell" title="Drag to reorder">
+            <div class="rank-handle">
+                ${icons.drag}
+                <span class="rank-number">${displayRank}</span>
+            </div>
+        </div>
+        <div class="backlog-cell type-cell" title="${issue.type}">
+            ${icons[issue.type]}
+        </div>
+        <div class="backlog-cell key-cell">${issue.key}</div>
+        <div class="backlog-cell summary-cell" title="${escapeHtml(issue.summary)}">${escapeHtml(issue.summary)}</div>
+        <div class="backlog-cell component-cell">${componentHtml}</div>
+        <div class="backlog-cell priority-cell" title="${issue.priority}">
+            ${icons[issue.priority]}
+        </div>
+        <div class="backlog-cell status-cell">
+            ${statusBadge}
+        </div>
+        <div class="backlog-cell assignee-cell">
+            ${assigneeHtml}
+        </div>
+        <div class="backlog-cell estimate-cell">
+            ${issue.estimate ? `<span class="backlog-estimate-badge">${issue.estimate}</span>` : '-'}
+        </div>
+    `;
+
+    // Click to select/show details
+    row.addEventListener('click', (e) => {
+        if (e.target.type === 'checkbox') return;
+        showIssueDetail(issue.id);
+    });
+
+    // Checkbox change
+    row.querySelector('.issue-checkbox').addEventListener('change', (e) => {
+        e.stopPropagation();
+        toggleIssueSelection(issue.id, e.target.checked);
+    });
+
+    return row;
+}
+
+// Get Status Badge HTML
+function getStatusBadge(columnId) {
+    if (columnId === 'backlog') {
+        return '<span class="backlog-status-badge backlog">Backlog</span>';
+    }
+    const column = state.columns.find(c => c.id === columnId);
+    if (!column) return '<span class="backlog-status-badge backlog">Backlog</span>';
+
+    let statusClass = 'todo';
+    if (column.name.toLowerCase().includes('progress') || column.name.toLowerCase().includes('review')) {
+        statusClass = 'in-progress';
+    } else if (column.name.toLowerCase().includes('done') || column.name.toLowerCase().includes('complete')) {
+        statusClass = 'done';
+    }
+
+    return `<span class="backlog-status-badge ${statusClass}">${column.name}</span>`;
+}
+
+// Setup Backlog Drag and Drop for Ranking
+function setupBacklogDragAndDrop() {
+    let draggedRow = null;
+    let draggedIssueId = null;
+
+    document.querySelectorAll('.backlog-row').forEach(row => {
+        row.addEventListener('dragstart', (e) => {
+            draggedRow = row;
+            draggedIssueId = row.dataset.issueId;
+            row.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedIssueId);
+        });
+
+        row.addEventListener('dragend', () => {
+            row.classList.remove('dragging');
+            document.querySelectorAll('.backlog-row').forEach(r => r.classList.remove('drag-over'));
+            draggedRow = null;
+            draggedIssueId = null;
+        });
+
+        row.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!draggedRow || draggedRow === row) return;
+
+            const rect = row.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+
+            document.querySelectorAll('.backlog-row').forEach(r => r.classList.remove('drag-over'));
+
+            if (e.clientY < midY) {
+                row.classList.add('drag-over');
+            } else {
+                row.classList.add('drag-over');
+            }
+        });
+
+        row.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (!draggedIssueId) return;
+
+            const targetId = row.dataset.issueId;
+            if (draggedIssueId === targetId) return;
+
+            // Reorder issues
+            reorderBacklogIssue(draggedIssueId, targetId);
+        });
+    });
+}
+
+// Reorder Backlog Issue
+function reorderBacklogIssue(draggedId, targetId) {
+    const backlogIssues = state.issues
+        .filter(i => i.columnId === 'backlog')
+        .sort((a, b) => (a.rank || 0) - (b.rank || 0));
+
+    const draggedIndex = backlogIssues.findIndex(i => i.id === draggedId);
+    const targetIndex = backlogIssues.findIndex(i => i.id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Remove dragged item and insert at target position
+    const [draggedIssue] = backlogIssues.splice(draggedIndex, 1);
+    backlogIssues.splice(targetIndex, 0, draggedIssue);
+
+    // Update ranks
+    backlogIssues.forEach((issue, index) => {
+        issue.rank = index + 1;
+    });
+
+    saveState();
+    renderBacklog();
+    showToast('Issue reranked', 'success');
+}
+
+// Toggle Issue Selection
+function toggleIssueSelection(issueId, selected) {
+    if (selected) {
+        if (!state.selectedIssues.includes(issueId)) {
+            state.selectedIssues.push(issueId);
+        }
+    } else {
+        state.selectedIssues = state.selectedIssues.filter(id => id !== issueId);
+    }
+
+    // Update row styling
+    const row = document.querySelector(`.backlog-row[data-issue-id="${issueId}"]`);
+    if (row) {
+        row.classList.toggle('selected', selected);
+    }
+
+    updateBulkActionsVisibility();
+    updateSelectAllCheckbox();
+}
+
+// Update Bulk Actions Visibility
+function updateBulkActionsVisibility() {
+    if (!elements.bulkActions || !elements.backlogFilters || !elements.selectedCount) return;
+
+    const hasSelection = state.selectedIssues.length > 0;
+    elements.bulkActions.style.display = hasSelection ? 'flex' : 'none';
+    elements.backlogFilters.style.display = hasSelection ? 'none' : 'flex';
+    elements.selectedCount.textContent = `${state.selectedIssues.length} selected`;
+}
+
+// Update Select All Checkbox
+function updateSelectAllCheckbox() {
+    if (!elements.selectAllBacklog) return;
+
+    const backlogIssues = getFilteredBacklogIssues();
+    const allSelected = backlogIssues.length > 0 && backlogIssues.every(i => state.selectedIssues.includes(i.id));
+    const someSelected = backlogIssues.some(i => state.selectedIssues.includes(i.id));
+
+    elements.selectAllBacklog.checked = allSelected;
+    elements.selectAllBacklog.indeterminate = someSelected && !allSelected;
+}
+
+// Select All Backlog Issues
+function selectAllBacklogIssues(selected) {
+    const backlogIssues = getFilteredBacklogIssues();
+
+    if (selected) {
+        state.selectedIssues = backlogIssues.map(i => i.id);
+    } else {
+        state.selectedIssues = [];
+    }
+
+    renderBacklog();
+}
+
+// Clear Selection
+function clearSelection() {
+    state.selectedIssues = [];
+    renderBacklog();
+}
+
+// Show Issue Detail Panel
+function showIssueDetail(issueId) {
+    const issue = state.issues.find(i => i.id === issueId);
+    if (!issue || !elements.issueDetailPanel) return;
+
+    state.detailPanelIssueId = issueId;
+
+    // Update detail panel content
+    document.getElementById('detailIssueKey').textContent = issue.key;
+    document.getElementById('detailSummary').textContent = issue.summary;
+    document.getElementById('detailDescriptionText').textContent = issue.description || 'No description';
+    document.getElementById('detailType').innerHTML = `${icons[issue.type]} <span style="margin-left: 4px; text-transform: capitalize;">${issue.type}</span>`;
+    document.getElementById('detailPriority').innerHTML = `${icons[issue.priority]} <span style="margin-left: 4px; text-transform: capitalize;">${issue.priority}</span>`;
+    document.getElementById('detailComponent').textContent = issue.component || '';
+    document.getElementById('detailAssignee').textContent = issue.assignee ? getAssigneeName(issue.assignee) : '';
+    document.getElementById('detailEstimate').textContent = issue.estimate || '';
+    document.getElementById('detailStatus').innerHTML = getStatusBadge(issue.columnId);
+    document.getElementById('detailLabels').textContent = issue.labels.length > 0 ? issue.labels.join(', ') : '';
+    document.getElementById('detailEpic').textContent = issue.epic || '';
+    document.getElementById('detailDueDate').textContent = issue.dueDate ? formatDate(issue.dueDate) : '';
+    document.getElementById('detailRank').textContent = issue.rank || '';
+
+    elements.issueDetailPanel.classList.remove('hidden');
+    elements.issueDetailPanel.classList.add('open');
+
+    // Highlight selected row
+    document.querySelectorAll('.backlog-row').forEach(row => {
+        row.style.borderLeft = row.dataset.issueId === issueId ? '3px solid var(--jira-blue)' : '';
+    });
+}
+
+// Close Issue Detail Panel
+function closeIssueDetailPanel() {
+    if (elements.issueDetailPanel) {
+        elements.issueDetailPanel.classList.add('hidden');
+        elements.issueDetailPanel.classList.remove('open');
+    }
+    state.detailPanelIssueId = null;
+
+    // Remove highlight from rows
+    document.querySelectorAll('.backlog-row').forEach(row => {
+        row.style.borderLeft = '';
+    });
+}
+
+// Send Issues to Board
+function sendIssuesToBoard(issueIds, targetColumnId = null) {
+    const columnId = targetColumnId || state.columns[0]?.id;
+    if (!columnId) {
+        showToast('No columns available', 'error');
+        return;
+    }
+
+    issueIds.forEach(id => {
+        const issue = state.issues.find(i => i.id === id);
+        if (issue) {
+            issue.columnId = columnId;
+        }
+    });
+
+    state.selectedIssues = state.selectedIssues.filter(id => !issueIds.includes(id));
+    saveState();
+    renderBacklog();
+    renderBoard();
+    showToast(`${issueIds.length} issue(s) sent to board`, 'success');
+}
+
+// Bulk Delete Issues
+function bulkDeleteIssues(issueIds) {
+    if (!confirm(`Delete ${issueIds.length} issue(s)?`)) return;
+
+    state.issues = state.issues.filter(i => !issueIds.includes(i.id));
+    state.selectedIssues = [];
+    saveState();
+    renderBacklog();
+    showToast(`${issueIds.length} issue(s) deleted`, 'success');
+}
+
+// Setup Backlog Event Listeners
+function setupBacklogEventListeners() {
+    // View tabs
+    document.querySelectorAll('.view-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchView(tab.dataset.view));
+    });
+
+    // Backlog filters
+    const componentFilter = document.getElementById('backlogComponentFilter');
+    const typeFilter = document.getElementById('backlogTypeFilter');
+    const assigneeFilter = document.getElementById('backlogAssigneeFilter');
+    const backlogSearch = document.getElementById('backlogSearchInput');
+
+    if (componentFilter) {
+        componentFilter.addEventListener('change', (e) => {
+            state.backlogFilters.component = e.target.value;
+            renderBacklog();
+        });
+    }
+
+    if (typeFilter) {
+        typeFilter.addEventListener('change', (e) => {
+            state.backlogFilters.type = e.target.value;
+            renderBacklog();
+        });
+    }
+
+    if (assigneeFilter) {
+        assigneeFilter.addEventListener('change', (e) => {
+            state.backlogFilters.assignee = e.target.value;
+            renderBacklog();
+        });
+    }
+
+    if (backlogSearch) {
+        backlogSearch.addEventListener('input', (e) => {
+            state.backlogFilters.search = e.target.value;
+            renderBacklog();
+        });
+    }
+
+    // Select all checkbox
+    if (elements.selectAllBacklog) {
+        elements.selectAllBacklog.addEventListener('change', (e) => {
+            selectAllBacklogIssues(e.target.checked);
+        });
+    }
+
+    // Bulk actions
+    const bulkMoveBtn = document.getElementById('bulkMoveToBoard');
+    const bulkDeleteBtn = document.getElementById('bulkDelete');
+    const clearSelectionBtn = document.getElementById('clearSelection');
+
+    if (bulkMoveBtn) {
+        bulkMoveBtn.addEventListener('click', () => {
+            sendIssuesToBoard([...state.selectedIssues]);
+        });
+    }
+
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', () => {
+            bulkDeleteIssues([...state.selectedIssues]);
+        });
+    }
+
+    if (clearSelectionBtn) {
+        clearSelectionBtn.addEventListener('click', clearSelection);
+    }
+
+    // Detail panel buttons
+    const closeDetailBtn = document.getElementById('closeDetailPanel');
+    const detailSendBtn = document.getElementById('detailSendToBoard');
+    const detailEditBtn = document.getElementById('detailEditIssue');
+
+    if (closeDetailBtn) {
+        closeDetailBtn.addEventListener('click', closeIssueDetailPanel);
+    }
+
+    if (detailSendBtn) {
+        detailSendBtn.addEventListener('click', () => {
+            if (state.detailPanelIssueId) {
+                sendIssuesToBoard([state.detailPanelIssueId]);
+                closeIssueDetailPanel();
+            }
+        });
+    }
+
+    if (detailEditBtn) {
+        detailEditBtn.addEventListener('click', () => {
+            if (state.detailPanelIssueId) {
+                const issue = state.issues.find(i => i.id === state.detailPanelIssueId);
+                if (issue) {
+                    closeIssueDetailPanel();
+                    openIssueModal(issue);
+                }
+            }
+        });
+    }
+
+    // Add backlog issue button
+    const addBacklogIssueBtn = document.getElementById('addBacklogIssue');
+    if (addBacklogIssueBtn) {
+        addBacklogIssueBtn.addEventListener('click', () => {
+            openIssueModal(null, 'backlog');
+        });
+    }
 }
 
 // Initialize on DOM ready
