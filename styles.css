@@ -761,33 +761,124 @@ body {
 .issue-assignee.bob { background-color: #6554C0; }
 .issue-assignee.alice { background-color: #00B8D9; }
 
-/* Swimlanes */
-.swimlane {
-    margin-bottom: var(--spacing-lg);
+/* Swimlanes - Grid Layout */
+.swimlane-grid {
+    display: grid;
+    gap: 0;
+    min-width: 100%;
+    border: 1px solid var(--neutral-40);
+    border-radius: var(--radius-md);
+    overflow: hidden;
 }
 
-.swimlane-header {
+.swimlane-grid-header-row {
+    display: contents;
+}
+
+.swimlane-grid-corner {
+    background-color: var(--neutral-30);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 2px solid var(--neutral-40);
+    border-right: 1px solid var(--neutral-40);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.swimlane-grid-column-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--neutral-30);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    margin-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--neutral-40);
+    border-right: 1px solid var(--neutral-40);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.swimlane-header:hover {
+.swimlane-grid-column-header:last-child {
+    border-right: none;
+}
+
+.swimlane-grid-column-header .column-color {
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.swimlane-grid-column-header .column-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--neutral-600);
+    white-space: nowrap;
+}
+
+.swimlane-grid-column-header .column-count {
+    font-size: 12px;
+    color: var(--neutral-200);
     background-color: var(--neutral-40);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.swimlane-grid-column-header .column-wip {
+    font-size: 11px;
+    color: var(--neutral-200);
+}
+
+.swimlane-grid-column-header .column-wip.over-limit {
+    color: var(--red);
+    font-weight: 600;
+}
+
+.swimlane-grid-column-header .edit-column {
+    margin-left: auto;
+    opacity: 0;
+    transition: var(--transition-fast);
+}
+
+.swimlane-grid-column-header:hover .edit-column {
+    opacity: 1;
+}
+
+.swimlane-grid-row {
+    display: contents;
+}
+
+.swimlane-grid-label {
+    background-color: var(--neutral-20);
+    border-right: 1px solid var(--neutral-40);
+    border-bottom: 1px solid var(--neutral-40);
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+.swimlane-label-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    height: 100%;
+    min-height: 120px;
+}
+
+.swimlane-label-content:hover {
+    background-color: var(--neutral-30);
 }
 
 .swimlane-toggle {
     width: 16px;
     height: 16px;
     transition: var(--transition-fast);
+    flex-shrink: 0;
 }
 
-.swimlane-header.collapsed .swimlane-toggle {
+.swimlane-label-content.collapsed .swimlane-toggle {
     transform: rotate(-90deg);
 }
 
@@ -795,6 +886,7 @@ body {
     font-weight: 600;
     font-size: 13px;
     color: var(--neutral-600);
+    writing-mode: horizontal-tb;
 }
 
 .swimlane-count {
@@ -802,13 +894,39 @@ body {
     color: var(--neutral-200);
 }
 
-.swimlane-content {
-    display: flex;
-    gap: var(--spacing-md);
+.swimlane-grid-cell {
+    background-color: var(--neutral-20);
+    border-right: 1px solid var(--neutral-40);
+    border-bottom: 1px solid var(--neutral-40);
+    min-height: 120px;
+    padding: var(--spacing-xs);
 }
 
-.swimlane-header.collapsed + .swimlane-content {
+.swimlane-grid-cell:last-child {
+    border-right: none;
+}
+
+.swimlane-grid-cell .column-body {
+    min-height: 100px;
+    padding: var(--spacing-xs);
+}
+
+.swimlane-grid-row:last-child .swimlane-grid-label,
+.swimlane-grid-row:last-child .swimlane-grid-cell {
+    border-bottom: none;
+}
+
+/* Collapsed swimlane row */
+.swimlane-grid-row.collapsed .swimlane-grid-cell {
     display: none;
+}
+
+.swimlane-grid-row.collapsed .swimlane-grid-label {
+    grid-column: 1 / -1;
+}
+
+.swimlane-grid-row.collapsed .swimlane-label-content {
+    min-height: auto;
 }
 
 /* Settings Panel */
@@ -1279,6 +1397,23 @@ body {
 
     .btn svg + span {
         display: none;
+    }
+
+    /* Swimlane grid responsive - make it scrollable horizontally */
+    .swimlane-grid {
+        overflow-x: auto;
+    }
+
+    .swimlane-grid-label {
+        min-width: 140px;
+    }
+
+    .swimlane-grid-cell {
+        min-width: 200px;
+    }
+
+    .swimlane-label-content {
+        min-height: 80px;
     }
 }
 

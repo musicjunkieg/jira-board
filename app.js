@@ -157,14 +157,13 @@ function renderBoard() {
         renderBoardWithSwimlanes();
     } else {
         renderBoardWithoutSwimlanes();
+        // Add column placeholder (only in non-swimlane view)
+        const placeholder = document.createElement('div');
+        placeholder.className = 'add-column-placeholder';
+        placeholder.innerHTML = '<span>+ Add Column</span>';
+        placeholder.addEventListener('click', () => openColumnModal());
+        elements.board.appendChild(placeholder);
     }
-
-    // Add column placeholder
-    const placeholder = document.createElement('div');
-    placeholder.className = 'add-column-placeholder';
-    placeholder.innerHTML = '<span>+ Add Column</span>';
-    placeholder.addEventListener('click', () => openColumnModal());
-    elements.board.appendChild(placeholder);
 
     setupDragAndDrop();
     updateWipIndicators();
@@ -196,53 +195,111 @@ function renderBoardWithoutSwimlanes() {
     });
 }
 
-// Render Board with Swimlanes
+// Render Board with Swimlanes (Grid Layout: columns on top, swimlanes on left)
 function renderBoardWithSwimlanes() {
     const swimlanes = getSwimlaneGroups();
 
-    swimlanes.forEach((swimlane, index) => {
-        const swimlaneContainer = document.createElement('div');
-        swimlaneContainer.className = 'swimlane';
-        swimlaneContainer.dataset.swimlane = swimlane.id;
+    // Create swimlane grid container
+    const swimlaneGrid = document.createElement('div');
+    swimlaneGrid.className = 'swimlane-grid';
+    swimlaneGrid.style.gridTemplateColumns = `200px repeat(${state.columns.length}, 1fr)`;
+
+    // Create column headers row
+    const headerRow = document.createElement('div');
+    headerRow.className = 'swimlane-grid-header-row';
+
+    // Empty cell for swimlane label column
+    const cornerCell = document.createElement('div');
+    cornerCell.className = 'swimlane-grid-corner';
+    headerRow.appendChild(cornerCell);
+
+    // Column headers
+    state.columns.forEach(column => {
+        const headerCell = document.createElement('div');
+        headerCell.className = 'swimlane-grid-column-header';
+
+        const issueCount = state.issues.filter(i => i.columnId === column.id && i.columnId !== 'backlog').length;
+        const wipText = column.wip > 0 ? `/ ${column.wip}` : '';
+        const wipClass = column.wip > 0 && issueCount > column.wip ? 'over-limit' : '';
+
+        headerCell.innerHTML = `
+            <div class="column-color" style="background-color: ${column.color}"></div>
+            <span class="column-title">${column.name}</span>
+            <span class="column-count">${issueCount}</span>
+            ${column.wip > 0 ? `<span class="column-wip ${wipClass}">${wipText}</span>` : ''}
+            <button class="column-action-btn edit-column" title="Edit Column">
+                ${icons.edit}
+            </button>
+        `;
+
+        headerCell.querySelector('.edit-column').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openColumnModal(column);
+        });
+
+        headerRow.appendChild(headerCell);
+    });
+
+    swimlaneGrid.appendChild(headerRow);
+
+    // Create swimlane rows
+    swimlanes.forEach((swimlane) => {
+        const swimlaneRow = document.createElement('div');
+        swimlaneRow.className = 'swimlane-grid-row';
+        swimlaneRow.dataset.swimlane = swimlane.id;
 
         const issueCount = getFilteredIssues().filter(i => getSwimlaneValue(i) === swimlane.id).length;
 
-        swimlaneContainer.innerHTML = `
-            <div class="swimlane-header" data-swimlane="${swimlane.id}">
+        // Swimlane label cell (row header)
+        const labelCell = document.createElement('div');
+        labelCell.className = 'swimlane-grid-label';
+        labelCell.innerHTML = `
+            <div class="swimlane-label-content" data-swimlane="${swimlane.id}">
                 <svg class="swimlane-toggle" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M7 10l5 5 5-5H7z"/>
                 </svg>
                 <span class="swimlane-title">${swimlane.name}</span>
-                <span class="swimlane-count">(${issueCount} issues)</span>
+                <span class="swimlane-count">(${issueCount})</span>
             </div>
-            <div class="swimlane-content"></div>
         `;
+        swimlaneRow.appendChild(labelCell);
 
-        const content = swimlaneContainer.querySelector('.swimlane-content');
-
+        // Create cells for each column in this swimlane row
         state.columns.forEach(column => {
-            const columnEl = createColumnElement(column, true);
-            const columnBody = columnEl.querySelector('.column-body');
-            columnBody.dataset.swimlane = swimlane.id;
+            const cell = document.createElement('div');
+            cell.className = 'swimlane-grid-cell';
+            cell.dataset.columnId = column.id;
+            cell.dataset.swimlane = swimlane.id;
+
+            const cellBody = document.createElement('div');
+            cellBody.className = 'column-body';
+            cellBody.dataset.columnId = column.id;
+            cellBody.dataset.swimlane = swimlane.id;
 
             const columnIssues = getFilteredIssues().filter(
                 issue => issue.columnId === column.id && getSwimlaneValue(issue) === swimlane.id
             );
 
             columnIssues.forEach(issue => {
-                columnBody.appendChild(createIssueCard(issue));
+                cellBody.appendChild(createIssueCard(issue));
             });
 
-            content.appendChild(columnEl);
+            cell.appendChild(cellBody);
+            swimlaneRow.appendChild(cell);
         });
 
-        elements.board.appendChild(swimlaneContainer);
+        swimlaneGrid.appendChild(swimlaneRow);
     });
 
+    elements.board.appendChild(swimlaneGrid);
+
     // Setup swimlane collapse
-    document.querySelectorAll('.swimlane-header').forEach(header => {
-        header.addEventListener('click', () => {
-            header.classList.toggle('collapsed');
+    document.querySelectorAll('.swimlane-label-content').forEach(label => {
+        label.addEventListener('click', () => {
+            const swimlaneId = label.dataset.swimlane;
+            const row = label.closest('.swimlane-grid-row');
+            label.classList.toggle('collapsed');
+            row.classList.toggle('collapsed');
         });
     });
 }
